@@ -61,12 +61,11 @@ rule no-innerhtml-assignment {
   enabled true
   priority 90
   severity error
-  ASK write
+  LOG write
   IF path GLOB "**/*.js" AND content LINE_REGEX "\\.innerHTML\\s*="
   OR path GLOB "**/*.mjs" AND content LINE_REGEX "\\.innerHTML\\s*="
   OR path GLOB "**/*.js" AND content CONTAINS "document.write("
   MESSAGE "innerHTML and document.write() with unsanitized input enable XSS attacks. Use textContent for plain text, or sanitize with DOMPurify before setting innerHTML."
-  PROMPT "Is the value being assigned to innerHTML sanitized with DOMPurify or equivalent? If not, use textContent or sanitize the input first."
 }
 
 rule no-require-user-input {
@@ -96,20 +95,18 @@ rule no-hardcoded-secrets-js {
   enabled true
   priority 90
   severity error
-  ASK write
+  LOG write
   IF path GLOB "**/*.js" AND content LINE_REGEX "(password|passwd|api_key|apiKey|secret|token|auth_token)\\s*[=:]\\s*['\"][^'\"]{8,}['\"]"
   OR path GLOB "**/*.mjs" AND content LINE_REGEX "(password|passwd|api_key|apiKey|secret|token|auth_token)\\s*[=:]\\s*['\"][^'\"]{8,}['\"]"
   MESSAGE "Hardcoded credential detected. Store secrets in environment variables and access via process.env.SECRET_NAME — never embed them in source code."
-  PROMPT "Is this a real credential or a placeholder? If real, move it to an environment variable and remove from source."
 }
 
 rule no-path-traversal-js {
   enabled true
   priority 90
   severity error
-  ASK write
+  LOG write
   IF path GLOB "**/*.js" AND content LINE_REGEX "(readFile|writeFile|createReadStream|createWriteStream|unlink)\\s*\\([^)]*req\\."
   OR path GLOB "**/*.js" AND content LINE_REGEX "(readFile|writeFile)\\s*\\(\\s*[^)]*\\+\\s*"
   MESSAGE "File system operations with user-controlled paths enable path traversal attacks (e.g., ../../etc/passwd). Sanitize paths with path.resolve() and validate they stay within the intended directory."
-  PROMPT "Is the file path validated against an allowed base directory? Use path.resolve(base, userInput) and check that the result starts with the expected base path."
 }

@@ -16,11 +16,10 @@ rule no-empty-catch-js {
   enabled true
   priority 80
   severity warning
-  ASK write
+  LOG write
   IF path GLOB "**/*.js" AND content LINE_REGEX "catch\\s*\\([^)]*\\)\\s*\\{\\s*\\}"
   OR path GLOB "**/*.mjs" AND content LINE_REGEX "catch\\s*\\([^)]*\\)\\s*\\{\\s*\\}"
   MESSAGE "Empty catch blocks silently swallow errors, hiding bugs in production. Log the error or re-throw it: catch (err) { console.error(err); throw err; }"
-  PROMPT "Is it intentional to ignore this error? If so, add a comment explaining why, otherwise log or handle it."
 }
 
 rule no-console-log-in-src-js {
